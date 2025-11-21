@@ -1,15 +1,17 @@
 export const drawLetters = () => {
   // Implement this method for wave 1
+  // !!!! Can refactor while loop and do a swap and pop to improve time complexity
   const letterPool = createLetterPool();
   const selectedIndex = [];
   const pickedLetters = [];
-  for (let i = 0; i <= 9; i++) {
-    let randSelection = randomMaxInclusive(0, letterPool.length - 1);
-    while (selectedIndex.includes(randSelection)) {
-      randSelection = randomMaxInclusive(0, letterPool.length - 1);
+  const numTilesAllowed = 10;
+  for (let i = 0; i < numTilesAllowed; i++) {
+    let randIndex = randomMaxInclusive(0, letterPool.length - 1);
+    while (selectedIndex.includes(randIndex)) {
+      randIndex = randomMaxInclusive(0, letterPool.length - 1);
     };
-    selectedIndex.push(randSelection);
-    const randomLetter = letterPool[randSelection];
+    selectedIndex.push(randIndex);
+    const randomLetter = letterPool[randIndex];
     pickedLetters.push(randomLetter);
 
   }
@@ -19,7 +21,31 @@ export const drawLetters = () => {
 
 export const usesAvailableLetters = (input, lettersInHand) => {
   // Implement this method for wave 2
+  const wordLetterFreq = {};
+  const handLetterFreq = {};
+
+  for (let letter of input.toUpperCase()) {
+    if (!lettersInHand.includes(letter)) {
+      return false;
+    } else {
+      wordLetterFreq[letter] = (wordLetterFreq[letter] ?? 0) + 1;
+    };
+  };
+
+  for (let letter of lettersInHand) {
+    handLetterFreq[letter] = (handLetterFreq[letter] ?? 0) + 1;
+  };
+
+  for (let letter of input.toUpperCase()) {
+    if (wordLetterFreq[letter] > handLetterFreq[letter]) {
+      return false;
+    }
+  };
+
+  return true;
 };
+
+
 
 export const scoreWord = (word) => {
   // Implement this method for wave 3
