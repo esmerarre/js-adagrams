@@ -1,6 +1,5 @@
 export const drawLetters = () => {
   // Implement this method for wave 1
-  // !!!! Can refactor while loop and do a swap and pop to improve time complexity
   const letterPool = createLetterPool();
   const selectedIndex = [];
   const pickedLetters = [];
@@ -16,7 +15,6 @@ export const drawLetters = () => {
 
   }
   return pickedLetters;
-
 };
 
 export const usesAvailableLetters = (input, lettersInHand) => {
@@ -45,11 +43,9 @@ export const usesAvailableLetters = (input, lettersInHand) => {
   return true;
 };
 
-
-
 export const scoreWord = (word) => {
   // Implement this method for wave 3
-  const scoreDict = {
+  const pointDict = {
     A: 1, E: 1, I: 1, O: 1, U: 1, L: 1, N: 1, R: 1, S: 1, T: 1,
     D: 2, G: 2,
     B: 3, C: 3, M: 3, P: 3,
@@ -58,19 +54,34 @@ export const scoreWord = (word) => {
     J: 8, X: 8,
     Q: 10, Z: 10
   };
+  const bonusPointsForLength = 8;
   let score = 0;
   for (const letter of word.toUpperCase()) {
-    score += scoreDict[letter];
-  };
-  if (word.length >= 7) {
-    score += 8;
-  };
-
+    score += pointDict[letter];
+  }
+  if (word.length >= 7 && word.length <= 10) {
+    score += bonusPointsForLength;
+  }
   return score;
 };
 
 export const highestScoreFrom = (words) => {
-  // Implement this method for wave 4
+  //Implement this method for wave 4
+  let wordScore = 0;
+  const wordDict = {};
+  for (const word of words) {
+    wordScore = scoreWord(word);
+    wordDict[word] = wordScore;
+  }
+  const scores = Object.values(wordDict);
+  const uniqueScores = [...new Set(scores)];
+  if (scores.length === uniqueScores.length) {
+    const winningWord = wordWithMaxScore(wordDict);
+    return { word: winningWord, score: wordDict[winningWord] };
+  } else {
+    const winningWord = breakTies(wordDict);
+    return winningWord;
+  }
 };
 
 const createLetterPool = () => {
@@ -99,3 +110,29 @@ const createLetterPool = () => {
 function randomMaxInclusive(min, max) {
   return Math.floor((Math.random()) * (max - min + 1)) + min;
 }
+
+const wordWithMaxScore = (wordDict) => {
+  const maxWord = Object.keys(wordDict).reduce((max, current) => {
+    return wordDict[max] > wordDict[current] ? max : current;
+  });
+  return maxWord;
+};
+
+const breakTies = (wordDict) => {
+  let highestScoreWord = null;
+  const wordWithHighScore = wordWithMaxScore(wordDict);
+  const allTiedWords = Object.keys(wordDict).filter(key => wordDict[key] === wordDict[wordWithHighScore]);
+  let longestWordLength = allTiedWords[0].length;
+  for (const word of allTiedWords) {
+    if (word.length < longestWordLength && word.length !== 10) {
+      longestWordLength = word.length;
+      highestScoreWord = word;
+    } else if (word.length === 10) {
+      highestScoreWord = word;
+      break;
+    } else {
+      highestScoreWord = allTiedWords[0];
+    }
+  }
+  return { word: highestScoreWord, score: wordDict[highestScoreWord] };
+};
